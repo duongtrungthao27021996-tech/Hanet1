@@ -1,0 +1,203 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Hanet.WebAPI</name>
+    </assembly>
+    <members>
+        <member name="M:Hanet.WebAPI.Controllers.DeviceController.GetListDevice">
+            <summary>
+            Lấy danh sách tất cả thiết bị
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.DeviceController.GetDeviceInfo(System.Int64)">
+            <summary>
+            Lấy thông tin chi tiết thiết bị
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.DeviceController.GetListDeviceByPlace(System.Int32)">
+            <summary>
+            Lấy danh sách thiết bị theo địa điểm
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.DeviceController.GetConnectionStatus(System.Int64)">
+            <summary>
+            Kiểm tra trạng thái kết nối thiết bị
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.DeviceController.UpdateDevice(System.Int64,Hanet.WebAPI.Controllers.UpdateDeviceRequest)">
+            <summary>
+            Cập nhật tên thiết bị
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.OAuthController.GetAuthorizationUrl(System.String)">
+            <summary>
+            Lấy Authorization URL để redirect user
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.OAuthController.GetToken(Hanet.WebAPI.Controllers.TokenRequest)">
+            <summary>
+            Lấy Access Token từ Authorization Code
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.OAuthController.RefreshToken(Hanet.WebAPI.Controllers.RefreshTokenRequest)">
+            <summary>
+            Refresh Access Token
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PartnerController.UpdateToken(Hanet.WebAPI.Controllers.UpdateTokenRequest)">
+            <summary>
+            Update Partner Token
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PartnerController.AddPlacePartner(Hanet.WebAPI.Controllers.PlacePartnerRequest)">
+            <summary>
+            Thêm Place vào Partner để nhận webhook
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PartnerController.RemovePlacePartner(Hanet.WebAPI.Controllers.PlacePartnerRequest)">
+            <summary>
+            Xóa Place khỏi Partner
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PartnerController.RemoveUserPartner(Hanet.WebAPI.Controllers.UpdateTokenRequest)">
+            <summary>
+            Xóa User Partner
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PartnerController.GetListUserPartner">
+            <summary>
+            Lấy danh sách User Partner
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PersonController.GetListPersonByPlace(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Lấy danh sách nhân viên theo địa điểm
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PersonController.RegisterPerson(Hanet.WebAPI.Controllers.RegisterPersonRequest)">
+            <summary>
+            Đăng ký nhân viên mới bằng ảnh Base64
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PersonController.RegisterPersonByUrl(Hanet.WebAPI.Controllers.RegisterPersonByUrlRequest)">
+            <summary>
+            Đăng ký nhân viên mới bằng URL ảnh
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PersonController.UpdatePersonByFaceImage(Hanet.WebAPI.Controllers.UpdatePersonByImageRequest)">
+            <summary>
+            Cập nhật nhân viên bằng ảnh Base64 (theo AliasID)
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PersonController.UpdatePersonByFaceUrl(Hanet.WebAPI.Controllers.UpdatePersonByUrlRequest)">
+            <summary>
+            Cập nhật nhân viên bằng URL ảnh (theo AliasID)
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PersonController.RemovePersonByAliasId(System.Int32,System.String)">
+            <summary>
+            Xóa nhân viên theo AliasID
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PersonController.RemovePersonByPersonId(System.String)">
+            <summary>
+            Xóa nhân viên theo PersonID
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PlaceController.GetPlaces">
+            <summary>
+            Lấy danh sách tất cả địa điểm
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PlaceController.GetPlaceInfo(System.Int32)">
+            <summary>
+            Lấy thông tin chi tiết địa điểm
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PlaceController.AddPlace(Hanet.WebAPI.Controllers.AddPlaceRequest)">
+            <summary>
+            Tạo địa điểm mới
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PlaceController.UpdatePlace(System.Int32,Hanet.WebAPI.Controllers.UpdatePlaceRequest)">
+            <summary>
+            Cập nhật thông tin địa điểm
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.PlaceController.RemovePlace(System.Int32)">
+            <summary>
+            Xóa địa điểm
+            </summary>
+        </member>
+        <member name="T:Hanet.WebAPI.Controllers.WebhookController">
+            <summary>
+            Controller xử lý webhook từ Hanet AI Camera
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.WebhookController.ReceiveCheckinData(Hanet.SDK.Models.CheckinWebhookData)">
+            <summary>
+            Webhook nhận dữ liệu checkin/checkout từ Hanet
+            </summary>
+            <param name="data">Dữ liệu checkin</param>
+            <returns></returns>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.WebhookController.ReceiveDeviceData(Hanet.SDK.Models.DeviceWebhookData)">
+            <summary>
+            Webhook nhận dữ liệu device (thêm/sửa/xóa thiết bị)
+            </summary>
+            <param name="data">Dữ liệu device</param>
+            <returns></returns>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.WebhookController.ReceivePersonData(Hanet.SDK.Models.PersonWebhookData)">
+            <summary>
+            Webhook nhận dữ liệu person/face (thêm/sửa/xóa FaceID)
+            </summary>
+            <param name="data">Dữ liệu person</param>
+            <returns></returns>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.WebhookController.ReceivePlaceData(Hanet.SDK.Models.PlaceWebhookData)">
+            <summary>
+            Webhook nhận dữ liệu place (thêm/sửa/xóa địa điểm)
+            </summary>
+            <param name="data">Dữ liệu place</param>
+            <returns></returns>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.WebhookController.ReceiveWebhook(System.Object)">
+            <summary>
+            Webhook tổng hợp - tự động phân loại theo data_type
+            </summary>
+            <param name="data">Raw webhook data</param>
+            <returns></returns>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.WebhookController.VerifyHash(System.String,System.String)">
+            <summary>
+            Verify hash từ Hanet (MD5 của client_secret + id)
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.WebhookController.ComputeMD5Hash(System.String)">
+            <summary>
+            Tính MD5 hash
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.WebhookController.ProcessCheckinData(Hanet.SDK.Models.CheckinWebhookData)">
+            <summary>
+            Xử lý dữ liệu checkin
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.WebhookController.ProcessDeviceData(Hanet.SDK.Models.DeviceWebhookData)">
+            <summary>
+            Xử lý dữ liệu device
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.WebhookController.ProcessPersonData(Hanet.SDK.Models.PersonWebhookData)">
+            <summary>
+            Xử lý dữ liệu person
+            </summary>
+        </member>
+        <member name="M:Hanet.WebAPI.Controllers.WebhookController.ProcessPlaceData(Hanet.SDK.Models.PlaceWebhookData)">
+            <summary>
+            Xử lý dữ liệu place
+            </summary>
+        </member>
+    </members>
+</doc>

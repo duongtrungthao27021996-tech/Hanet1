@@ -1,0 +1,41 @@
+[Unit]
+Description=Hanet WebAPI Service
+After=network.target
+
+[Service]
+Type=simple
+# User và Group chạy service (thay đổi nếu cần)
+User=root
+Group=root
+
+# Đường dẫn working directory
+WorkingDirectory=/var/www/hanet-api/current
+
+# Command để chạy ứng dụng
+ExecStart=/usr/share/dotnet/dotnet /var/www/hanet-api/current/Hanet.WebAPI.dll
+
+# Restart service khi bị crash
+Restart=on-failure
+RestartSec=10
+
+# Environment variables
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=http://localhost:5000
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=hanet-api
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Performance settings
+KillMode=mixed
+KillSignal=SIGINT
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

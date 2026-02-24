@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Callback - Hanet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .icon.success {
+            color: #4caf50;
+        }
+
+        .icon.error {
+            color: #f44336;
+        }
+
+        .icon.loading {
+            color: #667eea;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .code-box {
+            background: #f5f7ff;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 12px;
+            color: #333;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            background: #667eea;
+            color: white;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 0.8s linear infinite;
+            margin: 20px 0;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .error-details {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+            border-radius: 5px;
+        }
+
+        .error-details code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <div class="icon loading" id="icon">⏳</div>
+        <h1 id="title">Đang xử lý...</h1>
+        <p id="message">Vui lòng đợi trong giây lát</p>
+        <div class="loading-spinner" id="spinner"></div>
+        <div id="content"></div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const error = urlParams.get('error');
+        const errorDescription = urlParams.get('error_description');
+
+        const icon = document.getElementById('icon');
+        const title = document.getElementById('title');
+        const message = document.getElementById('message');
+        const spinner = document.getElementById('spinner');
+        const content = document.getElementById('content');
+
+        async function handleCallback() {
+            // Nếu có lỗi từ OAuth provider
+            if (error) {
+                showError(error, errorDescription);
+                return;
+            }
+
+            // Nếu có authorization code
+            if (code) {
+                await processAuthorizationCode(code);
+            } else {
+                showError('Missing Code', 'Không tìm thấy authorization code trong URL');
+            }
+        }
+
+        async function processAuthorizationCode(code) {
+            try {
+                spinner.style.display = 'inline-block';
+                
+                // Get redirect URI from URL or use default
+                const redirectUri = `${window.location.origin}${window.location.pathname}`;
+
+                // Send message to parent window (if opened from popup)
+                if (window.opener) {
+                    window.opener.postMessage({
+                        type: 'HANET_AUTH_SUCCESS',
+                        code: code,
+                        redirectUri: redirectUri
+                    }, window.location.origin);
+
+                    // Show success message
+                    showSuccess(code);
+                    
+                    // Auto close after 3 seconds
+                    setTimeout(() => {
+                        window.close();
+                    }, 3000);
+                } else {
+                    // If not in popup, show success with code
+                    showSuccess(code);
+                    
+                    // Create manual copy button
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'btn';
+                    copyBtn.textContent = '📋 Copy Code và quay lại trang chính';
+                    copyBtn.onclick = () => {
+                        navigator.clipboard.writeText(code);
+                        window.location.href = '/';
+                    };
+                    content.appendChild(copyBtn);
+                }
+            } catch (error) {
+                showError('Processing Error', error.message);
+            } finally {
+                spinner.style.display = 'none';
+            }
+        }
+
+        function showSuccess(code) {
+            icon.className = 'icon success';
+            icon.textContent = '✅';
+            title.textContent = 'Xác thực thành công!';
+            message.textContent = 'Authorization code đã được lấy thành công';
+            
+            const codeBox = document.createElement('div');
+            codeBox.className = 'code-box';
+            codeBox.innerHTML = `<strong>Authorization Code:</strong><br>${code}`;
+            content.appendChild(codeBox);
+
+            const info = document.createElement('p');
+            info.style.marginTop = '15px';
+            info.textContent = window.opener 
+                ? 'Cửa sổ này sẽ tự động đóng sau 3 giây...' 
+                : 'Bấm nút bên dưới để quay lại trang chính';
+            content.appendChild(info);
+        }
+
+        function showError(errorType, description) {
+            spinner.style.display = 'none';
+            icon.className = 'icon error';
+            icon.textContent = '❌';
+            title.textContent = 'Xác thực thất bại';
+            message.textContent = 'Đã xảy ra lỗi trong quá trình xác thực OAuth';
+            
+            const errorBox = document.createElement('div');
+            errorBox.className = 'error-details';
+            errorBox.innerHTML = `
+                <p><strong>Loại lỗi:</strong> <code>${errorType}</code></p>
+                ${description ? `<p><strong>Mô tả:</strong> ${description}</p>` : ''}
+                <p style="margin-top: 10px; font-size: 13px; color: #856404;">
+                    Vui lòng kiểm tra lại Client ID, Client Secret và Redirect URI trong cấu hình ứng dụng Hanet
+                </p>
+            `;
+            content.appendChild(errorBox);
+
+            const backBtn = document.createElement('button');
+            backBtn.className = 'btn';
+            backBtn.textContent = '🔙 Quay lại trang chính';
+            backBtn.onclick = () => {
+                if (window.opener) {
+                    window.close();
+                } else {
+                    window.location.href = '/';
+                }
+            };
+            content.appendChild(backBtn);
+        }
+
+        // Start processing when page loads
+        window.addEventListener('DOMContentLoaded', handleCallback);
+    </script>
+</body>
+</html>

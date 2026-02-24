@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Checkin - Hanet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .checkin-list {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .checkin-list-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .checkin-list-header h2 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .checkin-item {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: slideIn 0.3s ease-out;
+            transition: background 0.3s;
+        }
+
+        .checkin-item:hover {
+            background: #f8f9fa;
+        }
+
+        .checkin-item.new {
+            background: #f0f8ff;
+            border-left: 4px solid #4caf50;
+        }
+
+        .checkin-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .checkin-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .checkin-avatar .status-badge {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 18px;
+            height: 18px;
+            background: #4caf50;
+            border: 3px solid white;
+            border-radius: 50%;
+        }
+
+        .checkin-info {
+            flex: 1;
+        }
+
+        .checkin-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .checkin-details {
+            font-size: 14px;
+            color: #666;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .checkin-details span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .checkin-time {
+            font-size: 14px;
+            color: #999;
+            font-weight: 500;
+        }
+
+        .checkin-type {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .checkin-type.checkout {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: #999;
+        }
+
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notification-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            min-width: 300px;
+            display: none;
+            z-index: 1000;
+            border-left: 5px solid #4caf50;
+            animation: slideInRight 0.3s;
+        }
+
+        .notification-toast.show {
+            display: block;
+        }
+
+        .notification-toast .toast-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .notification-toast .toast-icon {
+            font-size: 32px;
+        }
+
+        .notification-toast .toast-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .notification-toast .toast-message {
+            font-size: 14px;
+            color: #666;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+        }
+
+        .refresh-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .refresh-btn.loading {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .filter-bar {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .filter-bar input,
+        .filter-bar select {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            flex: 1;
+        }
+
+        .filter-bar input:focus,
+        .filter-bar select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Monitor Chấm Công Realtime</h1>
+        <p>Theo dõi các sự kiện nhận diện khuôn mặt từ Hanet AI Camera</p>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card">
+            <h3>Tổng chấm công hôm nay</h3>
+            <div class="value" id="totalToday">0</div>
+        </div>
+        <div class="stat-card">
+            <h3>Check-in</h3>
+            <div class="value" id="totalCheckin" style="color: #4caf50;">0</div>
+        </div>
+        <div class="stat-card">
+            <h3>Check-out</h3>
+            <div class="value" id="totalCheckout" style="color: #f57c00;">0</div>
+        </div>
+        <div class="stat-card">
+            <h3>Gần đây nhất</h3>
+            <div class="value" id="lastCheckinTime" style="font-size: 18px; color: #666;">--:--</div>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm theo tên...">
+        <select id="deviceFilter">
+            <option value="">Tất cả thiết bị</option>
+        </select>
+        <select id="typeFilter">
+            <option value="">Tất cả loại</option>
+            <option value="checkin">Check-in</option>
+            <option value="checkout">Check-out</option>
+        </select>
+    </div>
+
+    <div class="checkin-list">
+        <div class="checkin-list-header">
+            <h2>Danh sách chấm công</h2>
+        </div>
+        <div id="checkinItems">
+            <div class="empty-state">
+                <div class="icon">⏳</div>
+                <p>Đang chờ dữ liệu chấm công...</p>
+            </div>
+        </div>
+    </div>
+
+    <button class="refresh-btn" id="refreshBtn" onclick="loadCheckins()">
+        🔄
+    </button>
+
+    <!-- Toast notification -->
+    <div class="notification-toast" id="toast">
+        <div class="toast-header">
+            <div class="toast-icon">✅</div>
+            <div class="toast-title">Chấm công thành công!</div>
+        </div>
+        <div class="toast-message" id="toastMessage"></div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin + '/api';
+        let checkins = [];
+        let pollInterval = null;
+
+        // Load checkins when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            loadCheckins();
+            startPolling();
+        });
+
+        async function loadCheckins() {
+            const btn = document.getElementById('refreshBtn');
+            btn.classList.add('loading');
+
+            try {
+                // Note: You'll need to add an endpoint to get checkin history
+                // For now, this is just a placeholder
+                const response = await fetch(`${API_BASE}/Webhook/checkins`);
+                
+                if (response.ok) {
+                    checkins = await response.json();
+                    renderCheckins();
+                    updateStats();
+                }
+            } catch (error) {
+                console.error('Error loading checkins:', error);
+            } finally {
+                btn.classList.remove('loading');
+            }
+        }
+
+        function renderCheckins() {
+            const container = document.getElementById('checkinItems');
+            
+            if (checkins.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>Chưa có dữ liệu chấm công</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = checkins.map((checkin, index) => `
+                <div class="checkin-item ${index === 0 ? 'new' : ''}">
+                    <div class="checkin-avatar">
+                        ${checkin.avatar ? 
+                            `<img src="${checkin.avatar}" alt="${checkin.personName}">` :
+                            checkin.personName.charAt(0).toUpperCase()
+                        }
+                        <div class="status-badge"></div>
+                    </div>
+                    <div class="checkin-info">
+                        <div class="checkin-name">${checkin.personName || 'Không xác định'}</div>
+                        <div class="checkin-details">
+                            <span>📍 ${checkin.placeName || 'N/A'}</span>
+                            <span>📱 ${checkin.deviceName || 'N/A'}</span>
+                            ${checkin.temperature ? `<span>🌡️ ${checkin.temperature}°C</span>` : ''}
+                            ${checkin.mask !== undefined ? `<span>${checkin.mask === 1 ? '😷 Có khẩu trang' : '😊 Không khẩu trang'}</span>` : ''}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="checkin-type ${checkin.type === 'checkout' ? 'checkout' : ''}">${checkin.type === 'checkout' ? 'Check-out' : 'Check-in'}</div>
+                        <div class="checkin-time">${formatTime(checkin.date)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            const today = new Date().toDateString();
+            const todayCheckins = checkins.filter(c => new Date(c.date).toDateString() === today);
+            
+            document.getElementById('totalToday').textContent = todayCheckins.length;
+            document.getElementById('totalCheckin').textContent = todayCheckins.filter(c => c.type !== 'checkout').length;
+            document.getElementById('totalCheckout').textContent = todayCheckins.filter(c => c.type === 'checkout').length;
+            
+            if (checkins.length > 0) {
+                const lastTime = new Date(checkins[0].date);
+                document.getElementById('lastCheckinTime').textContent = 
+                    lastTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+            }
+        }
+
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            
+            if (minutes < 1) return 'Vừa xong';
+            if (minutes < 60) return `${minutes} phút trước`;
+            if (minutes < 1440) return `${Math.floor(minutes / 60)} giờ trước`;
+            
+            return date.toLocaleString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function showToast(checkin) {
+            const toast = document.getElementById('toast');
+            const message = document.getElementById('toastMessage');
+            
+            message.textContent = `${checkin.personName} đã chấm công tại ${checkin.placeName}`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
+        }
+
+        function startPolling() {
+            // Poll every 5 seconds for new checkins
+            pollInterval = setInterval(async () => {
+                const oldLength = checkins.length;
+                await loadCheckins();
+                
+                // If new checkin, show toast
+                if (checkins.length > oldLength) {
+                    showToast(checkins[0]);
+                    
+                    // Play notification sound (optional)
+                    // new Audio('/notification.mp3').play();
+                }
+            }, 5000);
+        }
+
+        // Search and filter
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const search = e.target.value.toLowerCase();
+            const items = document.querySelectorAll('.checkin-item');
+            
+            items.forEach(item => {
+                const name = item.querySelector('.checkin-name').textContent.toLowerCase();
+                item.style.display = name.includes(search) ? '' : 'none';
+            });
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (pollInterval) {
+                clearInterval(pollInterval);
+            }
+        });
+    </script>
+</body>
+</html>

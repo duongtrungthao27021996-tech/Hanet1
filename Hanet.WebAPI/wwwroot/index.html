@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hanet OAuth Integration - Emis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .step {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .step:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .step.completed {
+            border-color: #4caf50;
+            background: #f1f8f4;
+        }
+
+        .step.active {
+            border-color: #667eea;
+            background: #f5f7ff;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .step.completed .step-number {
+            background: #4caf50;
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .step-description {
+            margin-left: 55px;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            margin-left: 55px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 55px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .info-box {
+            margin-left: 55px;
+            background: #f5f7ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .info-box.success {
+            background: #f1f8f4;
+            border-left-color: #4caf50;
+        }
+
+        .info-box p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .info-box strong {
+            color: #667eea;
+        }
+
+        .info-box.success strong {
+            color: #4caf50;
+        }
+
+        .copy-btn {
+            padding: 6px 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.3s;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        .notification.success {
+            border-left: 5px solid #4caf50;
+        }
+
+        .notification.error {
+            border-left: 5px solid #f44336;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .external-steps {
+            margin-left: 55px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .external-steps ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .external-steps li {
+            margin: 8px 0;
+            color: #856404;
+        }
+
+        .external-steps a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .external-steps a:hover {
+            text-decoration: underline;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+
+        .status-indicator.pending {
+            background: #ffc107;
+        }
+
+        .status-indicator.success {
+            background: #4caf50;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 0.8s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Hanet OAuth Integration</h1>
+            <p>Hệ thống tích hợp chấm công Hanet với Emis</p>
+        </div>
+
+        <div class="content">
+            <!-- Bước 1-4: Hướng dẫn setup ban đầu -->
+            <div class="step" id="step-initial">
+                <div class="step-header">
+                    <div class="step-number">1-4</div>
+                    <div class="step-title">Chuẩn bị tài khoản Hanet</div>
+                </div>
+                <div class="external-steps">
+                    <strong>⚠️ Các bước cần thực hiện trên Hanet:</strong>
+                    <ol>
+                        <li>Tạo tài khoản trên app <strong>Hanet Connect</strong></li>
+                        <li>Tạo địa điểm trong Hanet Connect</li>
+                        <li>Gắn thiết bị với địa điểm</li>
+                        <li>Đăng nhập vào <a href="https://developers.hanet.ai/apps" target="_blank">Hanet Developer Portal</a> và tạo ứng dụng để lấy Client ID và Client Secret</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Bước 5: Nhập thông tin -->
+            <div class="step active" id="step-5">
+                <div class="step-header">
+                    <div class="step-number">5</div>
+                    <div class="step-title">Nhập thông tin ứng dụng Hanet</div>
+                </div>
+                <div class="step-description">
+                    Nhập thông tin từ ứng dụng Hanet vừa tạo
+                </div>
+
+                <div class="form-group">
+                    <label>Base URL *</label>
+                    <input type="text" id="baseUrl" placeholder="https://hanet.onrender.com" value="https://hanet.onrender.com" required>
+                    <p style="margin: 5px 0 0 0; font-size: 12px; color: #666;">
+                        💡 URL của ứng dụng trên Render.com hoặc server của bạn
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label>Tên ứng dụng</label>
+                    <input type="text" id="appName" placeholder="Ví dụ: Emis Attendance System">
+                </div>
+
+                <div class="form-group">
+                    <label>Mô tả</label>
+                    <textarea id="description" placeholder="Mô tả ngắn gọn về ứng dụng"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Client ID *</label>
+                    <input type="text" id="clientId" placeholder="Nhập Client ID từ Hanet Developer Portal" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Client Secret *</label>
+                    <input type="password" id="clientSecret" placeholder="Nhập Client Secret từ Hanet Developer Portal" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Tenant ID (PlaceID)</label>
+                    <input type="text" id="tenantId" placeholder="ID địa điểm (tùy chọn)">
+                </div>
+
+                <button class="btn btn-primary" onclick="saveConfig()">💾 Lưu cấu hình</button>
+            </div>
+
+            <!-- Bước 6: Copy Webhook URL -->
+            <div class="step" id="step-6">
+                <div class="step-header">
+                    <div class="step-number">6</div>
+                    <div class="step-title">Cấu hình Webhook URL</div>
+                </div>
+                <div class="step-description">
+                    Copy Webhook URL và dán vào phần Webhook Settings trong <a href="https://developers.hanet.ai/apps" target="_blank">Hanet Developer Portal</a>
+                </div>
+
+                <div class="info-box">
+                    <p><strong>Webhook URL của bạn:</strong></p>
+                    <p id="webhookUrl" style="font-family: monospace; color: #667eea; font-weight: 600;">Đang tải...</p>
+                    <button class="copy-btn" onclick="copyWebhookUrl()">📋 Copy</button>
+                    <p style="margin-top: 10px; font-size: 12px; color: #666;">
+                        💡 <strong>Lưu ý:</strong> Hanet sẽ gửi tất cả webhook (checkin, device, person, place) đến URL này. Hệ thống tự động phân loại qua field <code>data_type</code>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bước 7: Kết nối OAuth -->
+            <div class="step" id="step-7">
+                <div class="step-header">
+                    <div class="step-number">7</div>
+                    <div class="step-title">Kết nối OAuth</div>
+                </div>
+                <div class="step-description">
+                    Bấm nút bên dưới để bắt đầu quá trình xác thực OAuth với Hanet
+                </div>
+
+                <div class="form-group">
+                    <label>Redirect URI</label>
+                    <input type="text" id="redirectUri" placeholder="Nhập URL callback của bạn (hoặc để trống dùng mặc định)">
+                    <p style="margin: 5px 0 0 0; font-size: 12px; color: #666;">
+                        Mặc định: <code id="defaultRedirectUri">Đang tải...</code>
+                    </p>
+                </div>
+
+                <button class="btn btn-success" id="connectBtn" onclick="startOAuth()" disabled>
+                    🔗 Kết nối với Hanet
+                </button>
+
+                <div class="info-box" id="authUrlBox" style="display: none;">
+                    <p><strong>Authorization URL:</strong></p>
+                    <p id="authUrl"></p>
+                    <button class="copy-btn" onclick="copyAuthUrl()">📋 Copy URL</button>
+                    <button class="btn btn-primary" onclick="openAuthUrl()" style="margin-left: 10px;">🚀 Mở trang xác thực</button>
+                    <p style="margin-top: 10px; font-size: 13px; color: #666;">
+                        💡 Sau khi đồng ý, bạn sẽ được redirect về trang callback với access token
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bước 8: Thiết lập khuôn mặt -->
+            <div class="step" id="step-8">
+                <div class="step-header">
+                    <div class="step-number">8</div>
+                    <div class="step-title">Thiết lập khuôn mặt</div>
+                </div>
+                <div class="step-description">
+                    Sau khi xác thực thành công, sử dụng Access Token để thêm người dùng và khuôn mặt
+                </div>
+
+                <div class="info-box success" id="tokenBox" style="display: none;">
+                    <p><strong>✅ Access Token:</strong></p>
+                    <p id="accessToken" style="word-break: break-all; font-size: 12px; font-family: monospace;"></p>
+                    <button class="copy-btn" onclick="copyAccessToken()">📋 Copy</button>
+                </div>
+
+                <div class="form-group" id="registerFaceSection" style="display: none;">
+                    <label>Quản lý khuôn mặt</label>
+                    <p style="margin-left: 0; margin-bottom: 10px; color: #666; font-size: 13px;">
+                        Sử dụng giao diện quản lý để đăng ký, xem và quản lý khuôn mặt người dùng
+                    </p>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="/face-management.html" target="_blank" class="btn btn-primary" style="flex: 1; text-align: center; text-decoration: none;">
+                            👤 Quản lý Khuôn Mặt
+                        </a>
+                        <a href="/swagger" target="_blank" class="btn btn-secondary" style="flex: 1; text-align: center; text-decoration: none; background: #6c757d; color: white;">
+                            📖 Swagger API
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bước 9: Webhook notifications -->
+            <div class="step" id="step-9">
+                <div class="step-header">
+                    <div class="step-number">9</div>
+                    <div class="step-title">Nhận thông báo chấm công</div>
+                </div>
+                <div class="step-description">
+                    Khi có sự kiện nhận diện khuôn mặt, Hanet sẽ gửi webhook callback về hệ thống
+                </div>
+
+                <div class="info-box">
+                    <p><strong>Trạng thái:</strong> <span id="webhookStatus">Đang lắng nghe webhook...</span></p>
+                    <p style="color: #666; font-size: 13px; margin-top: 10px;">
+                        Khi có nhận diện, thông báo sẽ xuất hiện tự động
+                    </p>
+                    <button class="copy-btn" onclick="toggleCheckinPolling()" id="togglePollingBtn">⏸️ Tạm dừng</button>
+                </div>
+
+                <div id="checkinNotifications" style="margin-top: 15px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification popup -->
+    <div class="notification" id="notification">
+        <p id="notificationText"></p>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin + '/api';
+        let BASE_URL = 'https://hanet.onrender.com'; // Configurable base URL for webhooks and OAuth
+        let currentConfig = {};
+
+        // Load webhook URL khi trang tải
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadWebhookUrl();
+            await loadCurrentConfig();
+            setupCallbackListener();
+            setupBaseUrlListener();
+        });
+
+        // Setup listener cho Base URL input
+        function setupBaseUrlListener() {
+            const baseUrlInput = document.getElementById('baseUrl');
+            if (baseUrlInput) {
+                baseUrlInput.addEventListener('input', function() {
+                    const newBaseUrl = this.value.trim().replace(/\/$/, '');
+                    if (newBaseUrl) {
+                        updateUrlDisplays(newBaseUrl);
+                    }
+                });
+            }
+        }
+
+        // Cập nhật hiển thị URLs khi Base URL thay đổi
+        function updateUrlDisplays(baseUrl) {
+            // Update Webhook URL (Step 6) - Hanet gọi trực tiếp vào base URL (không có path)
+            document.getElementById('webhookUrl').textContent = baseUrl;
+            
+            // Update Redirect URI (Step 7)
+            const redirectUri = baseUrl + '/api/OAuth/callback';
+            document.getElementById('defaultRedirectUri').textContent = redirectUri;
+            document.getElementById('redirectUri').value = redirectUri;
+        }
+
+        async function loadWebhookUrl() {
+            // Set initial webhook URL from BASE_URL
+            document.getElementById('webhookUrl').textContent = BASE_URL;
+        }
+
+        async function loadCurrentConfig() {
+            try {
+                const response = await fetch(`${API_BASE}/Config`);
+                const config = await response.json();
+                currentConfig = config;
+
+                // Update BASE_URL if exists in config
+                if (config.baseUrl) {
+                    BASE_URL = config.baseUrl;
+                    document.getElementById('baseUrl').value = BASE_URL;
+                    updateUrlDisplays(BASE_URL); // Update all URL displays
+                }
+
+                if (config.clientId) {
+                    document.getElementById('clientId').value = config.clientId;
+                    document.getElementById('clientSecret').value = config.clientSecret;
+                    document.getElementById('appName').value = config.appName || '';
+                    document.getElementById('description').value = config.description || '';
+                    document.getElementById('tenantId').value = config.tenantId || '';
+                    
+                    // Set default redirect URI
+                    const defaultRedirectUri = BASE_URL + '/api/OAuth/callback';
+                    document.getElementById('redirectUri').value = config.redirectUri || defaultRedirectUri;
+                    document.getElementById('defaultRedirectUri').textContent = defaultRedirectUri;
+
+                    // Enable connect button
+                    document.getElementById('connectBtn').disabled = false;
+                    markStepCompleted('step-5');
+
+                    // Nếu đã có access token
+                    if (config.accessToken) {
+                        showAccessToken(config.accessToken);
+                        markStepCompleted('step-7');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading config:', error);
+            }
+        }
+
+        async function saveConfig() {
+            const baseUrl = document.getElementById('baseUrl').value.trim().replace(/\/$/, ''); // Remove trailing slash
+            
+            if (!baseUrl) {
+                showNotification('Vui lòng nhập Base URL', 'error');
+                return;
+            }
+
+            // Update BASE_URL only (keep API_BASE as window.location.origin)
+            BASE_URL = baseUrl;
+
+            const config = {
+                baseUrl: baseUrl,
+                appName: document.getElementById('appName').value,
+                description: document.getElementById('description').value,
+                clientId: document.getElementById('clientId').value,
+                clientSecret: document.getElementById('clientSecret').value,
+                tenantId: document.getElementById('tenantId').value,
+                redirectUri: document.getElementById('redirectUri').value || BASE_URL + '/callback.html'
+            };
+
+            if (!config.clientId || !config.clientSecret) {
+                showNotification('Vui lòng nhập Client ID và Client Secret', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/Config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    currentConfig = config;
+                    showNotification('✅ Đã lưu cấu hình thành công', 'success');
+                    document.getElementById('connectBtn').disabled = false;
+                    markStepCompleted('step-5');
+                    markStepActive('step-6');
+                } else {
+                    showNotification('❌ Lỗi: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showNotification('❌ Lỗi khi lưu cấu hình', 'error');
+                console.error(error);
+            }
+        }
+
+        async function startOAuth() {
+            const redirectUri = document.getElementById('redirectUri').value || 
+                               BASE_URL + '/api/OAuth/callback';
+
+            // Lưu redirect URI vào config
+            currentConfig.redirectUri = redirectUri;
+            await fetch(`${API_BASE}/Config`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(currentConfig)
+            });
+
+            try {
+                const response = await fetch(`${API_BASE}/OAuth/authorization-url?redirectUri=${encodeURIComponent(redirectUri)}`);
+                const data = await response.json();
+                
+                document.getElementById('authUrl').textContent = data.authorizationUrl;
+                document.getElementById('authUrlBox').style.display = 'block';
+                
+                markStepCompleted('step-6');
+                markStepActive('step-7');
+                
+                showNotification('✅ Đã tạo Authorization URL', 'success');
+            } catch (error) {
+                showNotification('❌ Lỗi khi tạo Authorization URL', 'error');
+                console.error(error);
+            }
+        }
+
+        function openAuthUrl() {
+            const authUrl = document.getElementById('authUrl').textContent;
+            // Mở trong cùng tab để nhận callback
+            window.location.href = authUrl;
+        }
+
+        function copyWebhookUrl() {
+            const url = document.getElementById('webhookUrl').textContent;
+            navigator.clipboard.writeText(url);
+            showNotification('📋 Đã copy Webhook URL', 'success');
+        }
+
+        function copyAuthUrl() {
+            const url = document.getElementById('authUrl').textContent;
+            navigator.clipboard.writeText(url);
+            showNotification('📋 Đã copy Authorization URL', 'success');
+        }
+
+        function copyAccessToken() {
+            const token = document.getElementById('accessToken').textContent;
+            navigator.clipboard.writeText(token);
+            showNotification('📋 Đã copy Access Token', 'success');
+        }
+
+        function showAccessToken(token) {
+            document.getElementById('accessToken').textContent = token;
+            document.getElementById('tokenBox').style.display = 'block';
+            document.getElementById('registerFaceSection').style.display = 'block';
+            markStepCompleted('step-7');
+            markStepActive('step-8');
+        }
+
+        function setupCallbackListener() {
+            // Listen for messages from callback window
+            window.addEventListener('message', async (event) => {
+                if (event.data.type === 'HANET_AUTH_SUCCESS') {
+                    const { code, redirectUri } = event.data;
+                    
+                    showNotification('✅ Nhận được authorization code, đang lấy token...', 'success');
+
+                    try {
+                        // Exchange code for token
+                        const response = await fetch(`${API_BASE}/OAuth/token`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ code, redirectUri })
+                        });
+
+                        const tokenData = await response.json();
+                        
+                        if (tokenData.access_token) {
+                            // Save token to config
+                            currentConfig.accessToken = tokenData.access_token;
+                            currentConfig.refreshToken = tokenData.refresh_token;
+                            
+                            await fetch(`${API_BASE}/Config`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(currentConfig)
+                            });
+
+                            showAccessToken(tokenData.access_token);
+                            showNotification('🎉 Kết nối thành công! Access Token đã được lưu', 'success');
+                        }
+                    } catch (error) {
+                        showNotification('❌ Lỗi khi lấy Access Token', 'error');
+                        console.error(error);
+                    }
+                }
+            });
+        }
+
+        function markStepCompleted(stepId) {
+            const step = document.getElementById(stepId);
+            step.classList.add('completed');
+            step.classList.remove('active');
+        }
+
+        function markStepActive(stepId) {
+            const step = document.getElementById(stepId);
+            step.classList.add('active');
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            const text = document.getElementById('notificationText');
+            
+            text.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // WebSocket or polling for checkin notifications
+        let pollingInterval = null;
+        let lastCheckinId = null;
+        let isPolling = false;
+
+        // Bắt đầu polling khi page load
+        window.addEventListener('load', () => {
+            startCheckinPolling();
+        });
+
+        function startCheckinPolling() {
+            if (pollingInterval) return; // Already running
+            
+            isPolling = true;
+            updatePollingStatus();
+            checkForCheckins(); // Check immediately
+            pollingInterval = setInterval(checkForCheckins, 5000); // Poll every 5 seconds
+        }
+
+        function stopCheckinPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+            isPolling = false;
+            updatePollingStatus();
+        }
+
+        function toggleCheckinPolling() {
+            if (isPolling) {
+                stopCheckinPolling();
+            } else {
+                startCheckinPolling();
+            }
+        }
+
+        function updatePollingStatus() {
+            const statusEl = document.getElementById('webhookStatus');
+            const btnEl = document.getElementById('togglePollingBtn');
+            if (isPolling) {
+                statusEl.textContent = '🟢 Đang lắng nghe webhook...';
+                btnEl.textContent = '⏸️ Tạm dừng';
+            } else {
+                statusEl.textContent = '🔴 Đã tạm dừng';
+                btnEl.textContent = '▶️ Tiếp tục';
+            }
+        }
+
+        async function checkForCheckins() {
+            try {
+                const response = await fetch(`${API_BASE}/webhook/events?limit=20`);
+                if (!response.ok) return;
+
+                const events = await response.json();
+                
+                if (events && events.length > 0) {
+                    // Nếu có event mới
+                    const latestEvent = events[0];
+                    
+                    if (lastCheckinId !== latestEvent.id) {
+                        lastCheckinId = latestEvent.id;
+                        displayEventNotification(latestEvent);
+                        
+                        // Show browser notification
+                        if (Notification.permission === 'granted') {
+                            const eventTitle = getEventTitle(latestEvent);
+                            const eventBody = getEventBody(latestEvent);
+                            new Notification(eventTitle, {
+                                body: eventBody,
+                                icon: latestEvent.detectedImageUrl || latestEvent.avatar
+                            });
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking for events:', error);
+            }
+        }
+
+        function getEventTitle(event) {
+            const titles = {
+                'log': 'Hanet - Chấm công mới',
+                'person': 'Hanet - Cập nhật nhân viên',
+                'device': 'Hanet - Cập nhật thiết bị',
+                'place': 'Hanet - Cập nhật địa điểm'
+            };
+            return titles[event.dataType] || 'Hanet - Thông báo mới';
+        }
+
+        function getEventBody(event) {
+            switch(event.dataType) {
+                case 'log':
+                    return `${event.personName} vừa chấm công tại ${event.placeName}`;
+                case 'person':
+                    return `${event.actionType} nhân viên: ${event.personName} tại ${event.placeName}`;
+                case 'device':
+                    return `${event.actionType} thiết bị: ${event.deviceName} tại ${event.placeName}`;
+                case 'place':
+                    return `${event.actionType} địa điểm: ${event.placeName}`;
+                default:
+                    return 'Có sự kiện mới từ Hanet';
+            }
+        }
+
+        function displayEventNotification(event) {
+            const container = document.getElementById('checkinNotifications');
+            
+            const eventCard = document.createElement('div');
+            eventCard.className = 'info-box ' + (event.dataType === 'log' ? 'success' : '');
+            eventCard.style.animation = 'slideIn 0.3s';
+            eventCard.style.marginBottom = '10px';
+            
+            const time = new Date(event.time || event.date);
+            const formattedTime = time.toLocaleString('vi-VN');
+            
+            const emoji = {
+                'log': '✅',
+                'person': '👤',
+                'device': '📷',
+                'place': '🏢'
+            }[event.dataType] || '📌';
+            
+            const typeLabel = {
+                'log': 'Chấm công',
+                'person': 'Nhân viên',
+                'device': 'Thiết bị',
+                'place': 'Địa điểm'
+            }[event.dataType] || 'Event';
+            
+            const imageUrl = event.detectedImageUrl || event.avatar;
+            
+            eventCard.innerHTML = `
+                <div style="display: flex; gap: 15px; align-items: start;">
+                    ${imageUrl ? `
+                        <img src="${imageUrl}" 
+                             style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover;"
+                             alt="Image">
+                    ` : ''}
+                    <div style="flex: 1;">
+                        <p style="margin: 0; font-weight: 600; font-size: 16px; color: ${event.dataType === 'log' ? '#4caf50' : '#667eea'};">
+                            ${emoji} ${event.personName || event.deviceName || event.placeName || 'Unknown'}
+                        </p>
+                        <p style="margin: 5px 0; font-size: 12px; color: #999;">
+                            <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">
+                                ${typeLabel} - ${event.actionType || 'N/A'}
+                            </span>
+                        </p>
+                        ${event.placeName ? `
+                            <p style="margin: 5px 0; font-size: 13px; color: #666;">
+                                📍 ${event.placeName}${event.deviceName ? ` - ${event.deviceName}` : ''}
+                            </p>
+                        ` : ''}
+                        <p style="margin: 5px 0; font-size: 13px; color: #666;">
+                            🕐 ${formattedTime}
+                        </p>
+                        ${event.personTitle ? `
+                            <p style="margin: 5px 0; font-size: 13px; color: #666;">
+                                💼 ${event.personTitle}
+                            </p>
+                        ` : ''}
+                        ${event.aliasID ? `
+                            <p style="margin: 5px 0; font-size: 13px; color: #666;">
+                                🆔 ${event.aliasID}
+                            </p>
+                        ` : ''}
+                        ${event.mask !== null && event.mask !== undefined && event.mask >= 0 ? `
+                            <p style="margin: 5px 0; font-size: 13px; color: #666;">
+                                😷 ${event.mask === 2 ? 'Có đeo khẩu trang' : event.mask === 0 ? 'Không đeo khẩu trang' : 'N/A'}
+                            </p>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            // Thêm vào đầu danh sách
+            container.insertBefore(eventCard, container.firstChild);
+            
+            // Giới hạn số lượng hiển thị (giữ 20 events gần nhất)
+            while (container.children.length > 20) {
+                container.removeChild(container.lastChild);
+            }
+        }
+
+        // Request notification permission on load
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    </script>
+</body>
+</html>

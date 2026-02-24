@@ -1,0 +1,11 @@
+{
+  "BaseUrl": "https://f733b516-08d1-483c-8698-50e778f74289.webhook.site",
+  "AppName": "Emiskinder",
+  "Description": "camera",
+  "ClientId": "a1d75a91a0093f074436f8d02074f367",
+  "ClientSecret": "3c3b4cc3baeb76e6775d0b11c13d8ec8",
+  "AccessToken": "",
+  "RefreshToken": "",
+  "TenantId": "123",
+  "RedirectUri": "https://f733b516-08d1-483c-8698-50e778f74289.webhook.site/api/OAuth/callback"
+}

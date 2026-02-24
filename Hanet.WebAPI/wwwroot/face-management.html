@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Khuôn Mặt - Hanet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .header nav a {
+            margin-left: 15px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .header nav a:hover {
+            background: #5568d3;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .preview-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .preview-box img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .person-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .person-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .person-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .person-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .person-info {
+            flex: 1;
+        }
+
+        .person-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .person-details {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .person-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: #999;
+        }
+
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.3s;
+            max-width: 400px;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        .notification.success {
+            border-left: 5px solid #4caf50;
+        }
+
+        .notification.error {
+            border-left: 5px solid #f44336;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .filter-bar input {
+            flex: 1;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👤 Quản lý Khuôn Mặt</h1>
+            <nav>
+                <a href="/">🏠 Trang chủ</a>
+                <a href="/monitor.html">📊 Monitor</a>
+                <a href="/swagger">📖 API Docs</a>
+            </nav>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Tổng số người</h3>
+                <div class="value" id="totalPersons">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Địa điểm</h3>
+                <div class="value" id="totalPlaces">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Đã đăng ký hôm nay</h3>
+                <div class="value" id="todayRegistered">0</div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- Form đăng ký khuôn mặt -->
+            <div class="card">
+                <h2>➕ Đăng ký Khuôn Mặt Mới</h2>
+
+                <div class="form-group">
+                    <label>Địa điểm *</label>
+                    <select id="placeId" required>
+                        <option value="">Đang tải...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Họ và tên *</label>
+                    <input type="text" id="personName" placeholder="Nguyễn Văn A" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Mã nhân viên (Alias ID) *</label>
+                    <input type="text" id="aliasId" placeholder="NV001" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Chức danh</label>
+                    <input type="text" id="title" placeholder="Nhân viên IT">
+                </div>
+
+                <div class="form-group">
+                    <label>Loại người dùng *</label>
+                    <select id="personType">
+                        <option value="0">Nhân viên</option>
+                        <option value="2">Khách</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>URL ảnh khuôn mặt *</label>
+                    <input type="url" id="faceUrl" placeholder="https://example.com/photo.jpg" required>
+                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                        Ảnh cần rõ nét, 1 người, nhìn thẳng vào camera
+                    </small>
+                </div>
+
+                <div class="preview-box" id="previewBox" style="display: none;">
+                    <p style="color: #666; margin-bottom: 5px;">Xem trước ảnh:</p>
+                    <img id="previewImage" alt="Preview">
+                </div>
+
+                <button class="btn btn-primary" onclick="registerFace()" id="registerBtn">
+                    📸 Đăng ký Khuôn Mặt
+                </button>
+            </div>
+
+            <!-- Danh sách người dùng -->
+            <div class="card">
+                <h2>👥 Danh sách Người Dùng</h2>
+
+                <div class="filter-bar">
+                    <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm theo tên, mã nhân viên...">
+                    <select id="filterPlace" onchange="loadPersons()">
+                        <option value="">Tất cả địa điểm</option>
+                    </select>
+                    <button class="btn btn-secondary btn-small" onclick="loadPersons()">
+                        🔄 Tải lại
+                    </button>
+                </div>
+
+                <div class="person-list" id="personList">
+                    <div class="empty-state">
+                        <div class="icon">⏳</div>
+                        <p>Đang tải danh sách...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification popup -->
+    <div class="notification" id="notification">
+        <p id="notificationText"></p>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin + '/api';
+        let places = [];
+        let allPersons = [];
+
+        // Load dữ liệu khi trang tải
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadPlaces();
+            await loadPersons();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Preview ảnh khi nhập URL
+            document.getElementById('faceUrl').addEventListener('blur', function() {
+                const url = this.value;
+                if (url) {
+                    const preview = document.getElementById('previewImage');
+                    const box = document.getElementById('previewBox');
+                    
+                    preview.src = url;
+                    preview.onerror = function() {
+                        box.style.display = 'none';
+                        showNotification('❌ Không thể tải ảnh từ URL này', 'error');
+                    };
+                    preview.onload = function() {
+                        box.style.display = 'block';
+                    };
+                }
+            });
+
+            // Search filter
+            document.getElementById('searchInput').addEventListener('input', filterPersons);
+        }
+
+        async function loadPlaces() {
+            try {
+                const response = await fetch(`${API_BASE}/Place/list`);
+                const data = await response.json();
+
+                console.log('Places response:', data); // Debug log
+
+                if (data.returnCode === 1 && data.data) {
+                    places = data.data; // data là array trực tiếp
+                    
+                    // Populate place dropdown
+                    const placeSelect = document.getElementById('placeId');
+                    const filterSelect = document.getElementById('filterPlace');
+                    
+                    placeSelect.innerHTML = '<option value="">-- Chọn địa điểm --</option>';
+                    filterSelect.innerHTML = '<option value="">Tất cả địa điểm</option>';
+                    
+                    places.forEach(place => {
+                        const option1 = new Option(place.name, place.id);
+                        const option2 = new Option(place.name, place.id);
+                        placeSelect.add(option1);
+                        filterSelect.add(option2);
+                    });
+
+                    document.getElementById('totalPlaces').textContent = places.length;
+                } else {
+                    console.error('Invalid response structure:', data);
+                    showNotification('❌ Không thể tải danh sách địa điểm', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading places:', error);
+                showNotification('❌ Lỗi khi tải danh sách địa điểm', 'error');
+            }
+        }
+
+        async function loadPersons() {
+            const filterPlaceId = document.getElementById('filterPlace').value;
+            const personList = document.getElementById('personList');
+
+            personList.innerHTML = '<div class="empty-state"><div class="loading"></div><p>Đang tải...</p></div>';
+
+            try {
+                let allData = [];
+
+                if (filterPlaceId) {
+                    // Load cho 1 địa điểm cụ thể
+                    const data = await fetchPersonsByPlace(filterPlaceId);
+                    if (data) allData = data;
+                } else {
+                    // Load tất cả địa điểm
+                    for (const place of places) {
+                        const data = await fetchPersonsByPlace(place.id);
+                        if (data) allData = allData.concat(data);
+                    }
+                }
+
+                allPersons = allData;
+                renderPersons(allPersons);
+                updateStats();
+            } catch (error) {
+                console.error('Error loading persons:', error);
+                personList.innerHTML = '<div class="empty-state"><div class="icon">❌</div><p>Lỗi khi tải danh sách</p></div>';
+            }
+        }
+
+        async function fetchPersonsByPlace(placeId) {
+            try {
+                const response = await fetch(`${API_BASE}/Person/list?placeId=${placeId}`);
+                const data = await response.json();
+
+                console.log('Persons response for place', placeId, ':', data); // Debug log
+
+                if (data.returnCode === 1 && data.data) {
+                    // data.data là array trực tiếp
+                    return data.data.map(p => ({
+                        ...p,
+                        placeName: places.find(pl => pl.id == placeId)?.name || 'N/A'
+                    }));
+                }
+                return [];
+            } catch (error) {
+                console.error(`Error fetching persons for place ${placeId}:`, error);
+                return [];
+            }
+        }
+
+        function renderPersons(persons) {
+            const personList = document.getElementById('personList');
+
+            if (persons.length === 0) {
+                personList.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Chưa có người dùng nào</p></div>';
+                return;
+            }
+
+            personList.innerHTML = persons.map(person => `
+                <div class="person-item">
+                    <img class="person-avatar" 
+                         src="${person.avatar || 'https://via.placeholder.com/80?text=' + (person.name ? person.name.charAt(0) : '?')}" 
+                         alt="${person.name}"
+                         onerror="this.src='https://via.placeholder.com/80?text=' + '${person.name ? person.name.charAt(0) : '?'}'">
+                    <div class="person-info">
+                        <div class="person-name">${person.name || 'Không có tên'}</div>
+                        <div class="person-details">📍 Địa điểm: ${person.placeName}</div>
+                        <div class="person-details">🆔 Mã NV: ${person.aliasID || 'N/A'}</div>
+                        <div class="person-details">💼 Chức danh: ${person.title || 'N/A'}</div>
+                        <div class="person-details">👤 Loại: ${person.type === 0 ? 'Nhân viên' : person.type === 2 ? 'Khách' : 'Khác'}</div>
+                        <div class="person-actions">
+                            <button class="btn btn-secondary btn-small" onclick="viewPerson('${person.personID}')">
+                                👁️ Xem
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deletePerson(${person.placeID}, '${person.aliasID}', '${person.name}')">
+                                🗑️ Xóa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterPersons() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allPersons.filter(person => 
+                person.name?.toLowerCase().includes(searchTerm) ||
+                person.aliasID?.toLowerCase().includes(searchTerm) ||
+                person.title?.toLowerCase().includes(searchTerm)
+            );
+            renderPersons(filtered);
+        }
+
+        function updateStats() {
+            document.getElementById('totalPersons').textContent = allPersons.length;
+            
+            // Count today registered (giả sử có trường createdAt)
+            const today = new Date().toDateString();
+            const todayCount = allPersons.filter(p => 
+                p.createdAt && new Date(p.createdAt).toDateString() === today
+            ).length;
+            document.getElementById('todayRegistered').textContent = todayCount;
+        }
+
+        async function registerFace() {
+            const placeId = document.getElementById('placeId').value;
+            const name = document.getElementById('personName').value;
+            const aliasId = document.getElementById('aliasId').value;
+            const title = document.getElementById('title').value;
+            const type = parseInt(document.getElementById('personType').value);
+            const faceUrl = document.getElementById('faceUrl').value;
+
+            if (!placeId || !name || !aliasId || !faceUrl) {
+                showNotification('❌ Vui lòng điền đầy đủ thông tin bắt buộc', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('registerBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Đang xử lý...';
+
+            try {
+                const response = await fetch(`${API_BASE}/Person/register-face-url`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        placeID: parseInt(placeId),
+                        name: name,
+                        aliasID: aliasId,
+                        title: title,
+                        type: type,
+                        faceUrl: faceUrl
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.returnCode === 1) {
+                    showNotification('✅ Đăng ký khuôn mặt thành công!', 'success');
+                    
+                    // Reset form
+                    document.getElementById('personName').value = '';
+                    document.getElementById('aliasId').value = '';
+                    document.getElementById('title').value = '';
+                    document.getElementById('faceUrl').value = '';
+                    document.getElementById('previewBox').style.display = 'none';
+
+                    // Reload danh sách
+                    await loadPersons();
+                } else {
+                    showNotification(`❌ Lỗi: ${data.returnMessage || 'Không thể đăng ký'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error registering face:', error);
+                showNotification('❌ Lỗi khi đăng ký khuôn mặt', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '📸 Đăng ký Khuôn Mặt';
+            }
+        }
+
+        async function deletePerson(placeId, aliasId, personName) {
+            if (!confirm(`Bạn có chắc muốn xóa "${personName}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/Person/by-alias/${placeId}/${aliasId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.returnCode === 1) {
+                    showNotification('✅ Đã xóa thành công', 'success');
+                    await loadPersons();
+                } else {
+                    showNotification(`❌ Lỗi: ${data.returnMessage}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting person:', error);
+                showNotification('❌ Lỗi khi xóa người dùng', 'error');
+            }
+        }
+
+        function viewPerson(personId) {
+            const person = allPersons.find(p => p.personID === personId);
+            if (person) {
+                alert(`Thông tin chi tiết:\n\nTên: ${person.name}\nMã NV: ${person.aliasID}\nChức danh: ${person.title}\nĐịa điểm: ${person.placeName}`);
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            const text = document.getElementById('notificationText');
+            
+            text.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>

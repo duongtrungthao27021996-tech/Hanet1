@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  hanet-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hanet-api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      # Cấu hình Hanet (có thể override từ file .env)
+      - Hanet__ClientId=${HANET_CLIENT_ID:-a1d75a91a0093f074436f8d02074f367}
+      - Hanet__ClientSecret=${HANET_CLIENT_SECRET:-3c3b4cc3baeb76e6775d0b11c13d8ec8}
+      - Hanet__AccessToken=${HANET_ACCESS_TOKEN}
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - hanet-network
+
+networks:
+  hanet-network:
+    driver: bridge
