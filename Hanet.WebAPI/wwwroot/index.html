@@ -653,8 +653,8 @@
             try {
                 const response = await fetch(`${API_BASE}/OAuth/authorization-url?redirectUri=${encodeURIComponent(redirectUri)}`);
                 const data = await response.json();
-                
-                document.getElementById('authUrl').textContent = data.authorizationUrl;
+                const url = `https://oauth.hanet.com/oauth2/authorize?response_type=code&client_id=${document.getElementById('clientId').value}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=full`;
+                document.getElementById('authUrl').textContent = url;
                 document.getElementById('authUrlBox').style.display = 'block';
                 
                 markStepCompleted('step-6');
